@@ -23,8 +23,23 @@ def click(pos):
         ball_pos = list(pos)
         ball_color = "Red"
 
+# define a function to make ball move
+def move_v1():
+    global ball_pos
+    # try to make the ball moving around
+    if ball_pos[0] + 1 == WIDTH : 
+        ball_pos[0] = 0
+    else:
+        ball_pos[0] += 1
+    if ball_pos[1] + 1 == HEIGHT :
+        ball_pos[1] = 0
+    else:
+        ball_pos[1] += 1
+
+
 def draw(canvas):
     canvas.draw_circle(ball_pos, BALL_RADIUS, 1, "Black", ball_color)
+    move_v1()
 
 # create frame
 frame = simplegui.create_frame("Mouse selection", WIDTH, HEIGHT)
