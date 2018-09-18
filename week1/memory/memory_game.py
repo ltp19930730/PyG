@@ -4,9 +4,12 @@ import random
 
 FRONT = 1
 BACK = 0
+state = 0
+prev = [[],[]]
 
 def new_game():
-    pass
+    state = 0
+    init()
 
 # define a function from mapping the area to the index of list
 def getIndex(pos):
@@ -18,11 +21,32 @@ def getIndex(pos):
 #define event handlers
 def mouseclick(pos):
     #add game state logic here
-    global number
+    global number, state, prev
     index = getIndex(pos)
-    if number[index][1] == 0:
-        # the card is in the back state
-        number[index][1] = 1
+    while 1:
+        if state == 0 :
+            if number[index][1] == BACK:
+                # the card is in the back state
+                number[index][1] = FRONT
+                prev[0] = [index, number[index][0]]
+                state = 1
+            break
+        elif state == 1:
+            if number[index][1] == BACK:
+                prev[1] = [index, number[index][0]]
+                number[index][1] = FRONT
+                state = 2
+            break
+        elif state == 2:
+            if number[index][1] == BACK:
+                # compare the previous card
+                if prev[0][1] != prev[1][1] :
+                    ## flip the two unpaired cards over
+                    number[prev[0][0]][1] = BACK
+                    number[prev[1][0]][1] = BACK
+                state = 0
+            else:
+                break
 
 #cards are logically 50x50 pixels in size
 def layout():
@@ -39,7 +63,7 @@ offset = [15, 40]
 
 def init():
     global number
-    number = [[i,0] for i in range(32)]
+    number = [[i,BACK] for i in range(32)]
     tmp = copy.deepcopy(number)
     tmp.extend(number)
     random.shuffle(tmp)
@@ -61,7 +85,6 @@ def draw(canvas):
 frame = sg.create_frame("Memory", 400,400)
 frame.add_button("Reset", new_game, 60)
 label = frame.add_label("Turns = 0")
-init()
 
 # register event handlers
 frame.set_mouseclick_handler(mouseclick)
