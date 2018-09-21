@@ -1,3 +1,4 @@
+#! /usr/local/bin/python3
 import simpleguitk as sg
 import copy
 import random
@@ -6,9 +7,14 @@ FRONT = 1
 BACK = 0
 state = 0
 prev = [[],[]]
+total_turns = 0
 
 def new_game():
+    #initialize all the global value
+    global state, total_turns, label
     state = 0
+    total_turns = 0
+    label.set_text("Turns : 0")
     init()
 
 # define a function from mapping the area to the index of list
@@ -16,6 +22,11 @@ def getIndex(pos):
     x = pos[0] // 50
     y = pos[1] // 50
     return x*8 + y
+
+def addTurns():
+    global total_turns, label
+    total_turns += 1
+    label.set_text("Turns : " + str(total_turns))
 
 
 #define event handlers
@@ -30,12 +41,14 @@ def mouseclick(pos):
                 number[index][1] = FRONT
                 prev[0] = [index, number[index][0]]
                 state = 1
+                addTurns() # increase the counter
             break
         elif state == 1:
             if number[index][1] == BACK:
                 prev[1] = [index, number[index][0]]
                 number[index][1] = FRONT
                 state = 2
+                addTurns() # increase the counter
             break
         elif state == 2:
             if number[index][1] == BACK:
@@ -84,7 +97,8 @@ def draw(canvas):
 # create frame and add a button and labels
 frame = sg.create_frame("Memory", 400,400)
 frame.add_button("Reset", new_game, 60)
-label = frame.add_label("Turns = 0")
+label = frame.add_label("Turns: 0")
+
 
 # register event handlers
 frame.set_mouseclick_handler(mouseclick)
