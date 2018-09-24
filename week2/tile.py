@@ -27,8 +27,13 @@ class Tile:
         return "Number is " + str(self.number) + ", exposed is " + str(self.exposed)
 
     def draw_tile(self, canvas):
+        pos = self.pos
         if self.exposed:
-            canvas.draw_text(str(self.number), self.pos, 30, 'red')
+            text_location = [pos[0] + 0.2 * TILE_WIDTH, pos[1] - 0.3 * TILE_HEIGHT]
+            canvas.draw_text(str(self.number), text_location, TILE_WIDTH, 'White')
+        else:
+            tile_corners = (pos, [pos[0] + TILE_WIDTH, pos[1]], [pos[0] + TILE_WIDTH, pos[1] - TILE_HEIGHT], [pos[0], pos[1] - TILE_HEIGHT])
+            canvas.draw_polygon(tile_corners, 1, "Red", "Green")
 
 # draw handler
 def draw(canvas):
@@ -40,6 +45,6 @@ frame.set_draw_handler(draw)
 
 
 tile1 = Tile(3, True, [0, TILE_HEIGHT])
-tile2 = Tile(5, True, [TILE_WIDTH, TILE_HEIGHT])
+tile2 = Tile(5, False, [TILE_WIDTH, TILE_HEIGHT])
 
 frame.start()
