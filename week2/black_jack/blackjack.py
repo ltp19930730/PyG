@@ -30,7 +30,7 @@ class Card:
             self.suit = suit
             self.rank = rank
         else:
-            print "Invalid card: ", self.suit, self.rank
+            print ("Invalid card: ", self.suit, self.rank)
 
     def __str__(self):
         return self.suit + self.rank
@@ -42,8 +42,8 @@ class Card:
         return self.rank
 
     def draw(self, canvas, pos):
-        card_loc = (card_size[0] * (0.5 + RANKS.index(self.rank)), card_size[1] * (0.5 + SUITS.index(self.suit)))
-        canvas.draw_image(card_images, card_loc, card_size, [pos[0] + card_size[0] / 2, pos[1] + card_size[1] / 2], card_size)
+        card_loc = (CARD_SIZE[0] * (0.5 + RANKS.index(self.rank)), CARD_SIZE[1] * (0.5 + SUITS.index(self.suit)))
+        canvas.draw_image(card_images, card_loc, CARD_SIZE, [pos[0] + CARD_SIZE[0] / 2, pos[1] + CARD_SIZE[1] / 2], CARD_SIZE)
         
 # define hand class
 class Hand:
@@ -104,8 +104,8 @@ def stand():
     # assign a message to outcome, update in_play and score
 
 def draw(canvas):
-    pass	# replace with your code below
-
+    card = Card("S", "A")
+    card.draw(canvas, [300, 300])
 
 # initialization frame
 frame = simplegui.create_frame("Blackjack", 600, 600)
