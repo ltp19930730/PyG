@@ -4,6 +4,7 @@
 import simpleguitk as simplegui
 import random
 
+
 # load card sprite - 950x392 - source: jfitz.com
 CARD_SIZE = (73, 98)
 card_images = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/cards.jfitz.png")
@@ -47,14 +48,18 @@ class Card:
         
 # define hand class
 class Hand:
-    def __init__(self):
-        pass	# replace with your code
+    def __init__(self, pos):
+        self.cards = []
+        self.pos = pos
 
     def __str__(self):
-        pass	# replace with your code
+        res = 'Hands contains '
+        for card in self.cards:
+            res += str(card)
+        return res
 
     def add_card(self, card):
-        pass	# replace with your code
+        self.cards.append(card)
 
     # count aces as 1, if the hand has an ace, then add 10 to hand value if don't bust
     def get_value(self):
@@ -63,26 +68,63 @@ class Hand:
     def busted(self):
         pass	# replace with your code
     
-    def draw(self, canvas, p):
-        pass	# replace with your code
+    def draw(self, canvas):
+        x_cor = self.pos[0]
+        y_cor = self.pos[1]
+        for card in self.cards:
+            card.draw(canvas, [x_cor,y_cor])
+            x_cor += 100
+
+
+    def clean(self):
+        self.cards = []
  
         
 # define deck class
 class Deck:
     def __init__(self):
-        pass	# replace with your code
+        self.deck = [Card(suit, rank) for suit in SUITS for rank in RANKS]
+        self.pos = 0
 
     # add cards back to deck and shuffle
     def shuffle(self):
-        pass	# replace with your code
+        random.shuffle(self.deck)
+        self.pos = 0
+
+    def __str__(self):
+        res = 'Deck contains '
+        for card in self.deck:
+            res += str(card) + ' '
+        return res
 
     def deal_card(self):
-        pass	# replace with your code
+        card = self.deck[self.pos]
+        self.pos += 1
+        return card
 
+
+deck = Deck()
+player = Hand([20,300])
+dealer = Hand([300,300])
 
 #define callbacks for buttons
 def deal():
-    global outcome, in_play
+    global outcome, in_play, deck
+    deck.shuffle()
+    player.clean()
+    dealer.clean()
+    print(deck)
+    
+    # add two cards from deck to player
+    for i in range(2):
+        player.add_card(deck.deal_card())
+
+    # add two cards from deck to dealer
+    for i in range(2):
+        dealer.add_card(deck.deal_card())
+
+    print (player)
+    print (dealer)
 
     # your code goes here
     
@@ -92,7 +134,6 @@ def deal():
 def hit():
     pass	# replace with your code below
  
-    # if the hand is in play, hit the player
    
     # if busted, assign an message to outcome, update in_play and score
        
@@ -104,8 +145,11 @@ def stand():
     # assign a message to outcome, update in_play and score
 
 def draw(canvas):
-    card = Card("S", "A")
-    card.draw(canvas, [300, 300])
+    ##card = Card("S", "A")
+    ##card.draw(canvas, [300, 300])
+    global player, dealer
+    player.draw(canvas)
+    dealer.draw(canvas)
 
 # initialization frame
 frame = simplegui.create_frame("Blackjack", 600, 600)
