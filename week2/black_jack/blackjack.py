@@ -15,7 +15,6 @@ card_back = simplegui.load_image("http://commondatastorage.googleapis.com/codesk
 # initialize global variables
 deck = []
 in_play = False
-outcome = ""
 score = 0
 
 # define globals for cards
@@ -63,17 +62,33 @@ class Hand:
 
     # count aces as 1, if the hand has an ace, then add 10 to hand value if don't bust
     def get_value(self):
-        pass	# replace with your code
+        value = 0
+        num_ace = 0
+        for card in self.cards:
+            rank = card.get_rank()
+            value += VALUES[rank]
+            if rank == 'A':
+                num_ace += 1
+        
+        for i in range(num_ace):
+            if value + 10 <= 21:
+                value += 10
+        return value
 
+    # if hand buster showed 
     def busted(self):
-        pass	# replace with your code
+        pass
     
     def draw(self, canvas):
-        x_cor = self.pos[0]
-        y_cor = self.pos[1]
+        x_bias = 0
+        y_bias = 0
         for card in self.cards:
-            card.draw(canvas, [x_cor,y_cor])
-            x_cor += 100
+            card.draw(canvas, [x_bias + self.pos[0],y_bias + self.pos[1]])
+            if x_bias + CARD_SIZE[0] >= 200:
+                x_bias = 0
+                y_bias += 100
+            else:
+                x_bias += 100
 
 
     def clean(self):
@@ -104,8 +119,8 @@ class Deck:
 
 
 deck = Deck()
-player = Hand([20,300])
-dealer = Hand([300,300])
+player = Hand([20,100])
+dealer = Hand([340,100])
 
 #define callbacks for buttons
 def deal():
@@ -128,17 +143,40 @@ def deal():
 
     # your code goes here
     
-    outcome = ""
+    outcome.set_text("IN GAME")
     in_play = True
 
 def hit():
-    pass	# replace with your code below
- 
+    global player, deck, score, in_play
+    if in_play == False:
+        return
+    if player.get_value() <= 21:
+        player.add_card(deck.deal_card())
+    if player.get_value() > 21:
+        player.busted()
+        in_play = False
+        outcome.set_text("You have busted!!")
+        score -= 1
+        score_l.set_text("Score : " + str(score))
+        
    
     # if busted, assign an message to outcome, update in_play and score
        
 def stand():
-    pass	# replace with your code below
+    global in_play, dealer, score
+    if in_play == True:
+        while dealer.get_value() < 17:
+            dealer.add_card(deck.deal_card())
+        res_d = dealer.get_value()
+        if res_d > 21 or player.get_value() > res_d:
+            outcome.set_text("You win !!")
+            score += 1
+        else:
+            outcome.set_text("You lost !!")
+            score -= 1
+        score_l.set_text("Score : " + str(score))
+        in_play = False
+
    
     # if hand is in play, repeatedly hit dealer until his hand has value 17 or more
 
@@ -160,6 +198,8 @@ frame.add_button("Deal", deal, 200)
 frame.add_button("Hit",  hit, 200)
 frame.add_button("Stand", stand, 200)
 frame.set_draw_handler(draw)
+score_l = frame.add_label("Score : 0")
+outcome = frame.add_label("IN GAME")
 
 # deal an initial hand
 
