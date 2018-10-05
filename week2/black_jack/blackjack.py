@@ -15,6 +15,7 @@ card_back = simplegui.load_image("http://commondatastorage.googleapis.com/codesk
 # initialize global variables
 deck = []
 in_play = False
+outcome = ''
 score = 0
 
 # define globals for cards
@@ -41,15 +42,19 @@ class Card:
     def get_rank(self):
         return self.rank
 
-    def draw(self, canvas, pos):
-        card_loc = (CARD_SIZE[0] * (0.5 + RANKS.index(self.rank)), CARD_SIZE[1] * (0.5 + SUITS.index(self.suit)))
-        canvas.draw_image(card_images, card_loc, CARD_SIZE, [pos[0] + CARD_SIZE[0] / 2, pos[1] + CARD_SIZE[1] / 2], CARD_SIZE)
+    def draw(self, canvas, pos, back = 0):
+        if back == 1:
+            canvas.draw_image(card_back, (CARD_BACK_SIZE[0] / 2, CARD_BACK_SIZE[1] / 2), CARD_BACK_SIZE, [pos[0] + CARD_BACK_SIZE[0] / 2, pos[1] + CARD_BACK_SIZE[1] / 2], CARD_BACK_SIZE)
+        else:
+            card_loc = (CARD_SIZE[0] * (0.5 + RANKS.index(self.rank)), CARD_SIZE[1] * (0.5 + SUITS.index(self.suit)))
+            canvas.draw_image(card_images, card_loc, CARD_SIZE, [pos[0] + CARD_SIZE[0] / 2, pos[1] + CARD_SIZE[1] / 2], CARD_SIZE)
         
 # define hand class
 class Hand:
-    def __init__(self, pos):
+    def __init__(self, pos, dealer = 0):
         self.cards = []
         self.pos = pos
+        self.dealer = dealer
 
     def __str__(self):
         res = 'Hands contains '
@@ -82,11 +87,14 @@ class Hand:
     def draw(self, canvas):
         x_bias = 0
         y_bias = 0
-        for card in self.cards:
-            card.draw(canvas, [x_bias + self.pos[0],y_bias + self.pos[1]])
+        global in_play
+        for i in range(len(self.cards)):
+            self.cards[i].draw(canvas, [x_bias + self.pos[0],y_bias + self.pos[1]])
+            if in_play == True and self.dealer == 1 and i == 0:
+                self.cards[i].draw(canvas, [x_bias + self.pos[0],y_bias + self.pos[1]], 1)
             if x_bias + CARD_SIZE[0] >= 200:
                 x_bias = 0
-                y_bias += 100
+                y_bias += 120
             else:
                 x_bias += 100
 
@@ -120,7 +128,7 @@ class Deck:
 
 deck = Deck()
 player = Hand([20,100])
-dealer = Hand([340,100])
+dealer = Hand([320,100], 1)
 
 #define callbacks for buttons
 def deal():
@@ -143,11 +151,11 @@ def deal():
 
     # your code goes here
     
-    outcome.set_text("IN GAME")
+    outcome = "Hit or stand ?"
     in_play = True
 
 def hit():
-    global player, deck, score, in_play
+    global player, deck, score, in_play, outcome
     if in_play == False:
         return
     if player.get_value() <= 21:
@@ -155,7 +163,7 @@ def hit():
     if player.get_value() > 21:
         player.busted()
         in_play = False
-        outcome.set_text("You have busted!!")
+        outcome = "You have busted!!"
         score -= 1
         score_l.set_text("Score : " + str(score))
         
@@ -163,16 +171,16 @@ def hit():
     # if busted, assign an message to outcome, update in_play and score
        
 def stand():
-    global in_play, dealer, score
+    global in_play, dealer, score, outcome
     if in_play == True:
         while dealer.get_value() < 17:
             dealer.add_card(deck.deal_card())
         res_d = dealer.get_value()
         if res_d > 21 or player.get_value() > res_d:
-            outcome.set_text("You win !!")
+            outcome = "You win !!"
             score += 1
         else:
-            outcome.set_text("You lost !!")
+            outcome = "You lost !!"
             score -= 1
         score_l.set_text("Score : " + str(score))
         in_play = False
@@ -185,9 +193,10 @@ def stand():
 def draw(canvas):
     ##card = Card("S", "A")
     ##card.draw(canvas, [300, 300])
-    global player, dealer
+    global player, dealer, outcome
     player.draw(canvas)
     dealer.draw(canvas)
+    canvas.draw_text(outcome, (20, 400), 12, 'Red')
 
 # initialization frame
 frame = simplegui.create_frame("Blackjack", 600, 600)
@@ -199,7 +208,7 @@ frame.add_button("Hit",  hit, 200)
 frame.add_button("Stand", stand, 200)
 frame.set_draw_handler(draw)
 score_l = frame.add_label("Score : 0")
-outcome = frame.add_label("IN GAME")
+state = frame.add_label("IN GAME")
 
 # deal an initial hand
 
